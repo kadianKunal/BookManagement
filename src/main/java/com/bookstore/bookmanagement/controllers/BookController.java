@@ -31,7 +31,6 @@ public class BookController {
         return ResponseEntity.ok(books);
     }
 
-
     /**
      * Retrieves a book by its ID.
      *
@@ -54,7 +53,6 @@ public class BookController {
         }
     }
 
-
     /**
      * Creates a new book.
      *
@@ -72,7 +70,6 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 
     /**
      * Updates an existing book.
@@ -98,7 +95,6 @@ public class BookController {
         }
     }
 
-
     /**
      * Deletes a book.
      *
@@ -121,6 +117,5 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 
 }
