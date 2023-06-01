@@ -2,11 +2,13 @@ package com.bookstore.bookmanagement.services;
 
 import com.bookstore.bookmanagement.dao.BookRepository;
 import com.bookstore.bookmanagement.entities.Book;
+import com.bookstore.bookmanagement.models.BookDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +67,63 @@ public class BookService {
             log.warn("Book not found with ID: {}", id);
             return null;
         }
+    }
+
+    public void returnBooks(List<BookDetail> bookDetailList) {
+
+        // validate list of books
+        for(BookDetail bookDetail: bookDetailList) {
+            int bookId = bookDetail.getBookId();
+            Optional<Book> optionalBook = bookRepository.findById(bookId);
+            if(optionalBook.isEmpty()) {
+                log.warn("Book not found with ID: {}", bookId);
+                throw new IllegalArgumentException("Failed to retrieve book with ID: " + bookId);
+            }
+        }
+
+        // update inventory, add back books
+        for(BookDetail bookDetail: bookDetailList) {
+            Book book = bookRepository.findById(bookDetail.getBookId()).get();
+            int currentBookQuantity = book.getQuantity();
+            int orderedBookQuantity = bookDetail.getOrderedQuantity();
+
+            book.setQuantity(currentBookQuantity + orderedBookQuantity);
+            updateBook(book.getId(), book);
+        }
+    }
+
+    public List<Book> orderBooks(List<BookDetail> bookDetailList) {
+
+        // validate if all books are in stock and if required quantity can be met
+        for(BookDetail bookDetail: bookDetailList) {
+
+            int bookId = bookDetail.getBookId();
+            Optional<Book> optionalBook = bookRepository.findById(bookId);
+            if(optionalBook.isEmpty()) {
+                log.warn("Book not found with ID: {}", bookId);
+                throw new IllegalArgumentException("Failed to retrieve book with ID: " + bookId);
+            }
+
+            Book book = optionalBook.get();
+            if(book.getQuantity() < bookDetail.getOrderedQuantity()){
+                throw new IllegalArgumentException("Book with ID: " + bookId + " is not in stock.");
+            }
+        }
+
+        //process the order, update inventory
+        List<Book> orderedBookDetails = new ArrayList<>();
+
+        for(BookDetail bookDetail: bookDetailList) {
+            Book book = bookRepository.findById(bookDetail.getBookId()).get();
+            int currentBookQuantity = book.getQuantity();
+            int orderedBookQuantity = bookDetail.getOrderedQuantity();
+
+            book.setQuantity(currentBookQuantity - orderedBookQuantity);
+            Book updatedBook = updateBook(book.getId(), book);
+            orderedBookDetails.add(updatedBook);
+        }
+
+        return orderedBookDetails;
     }
 
     /**

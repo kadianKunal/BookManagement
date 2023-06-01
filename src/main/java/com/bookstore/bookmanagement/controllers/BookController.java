@@ -1,6 +1,7 @@
 package com.bookstore.bookmanagement.controllers;
 
 import com.bookstore.bookmanagement.entities.Book;
+import com.bookstore.bookmanagement.models.BookDetail;
 import com.bookstore.bookmanagement.services.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,42 @@ public class BookController {
         } catch (Exception e) {
             log.error("Failed to fetch book with ID: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Used to issue books when an order is placed
+     *
+     * @param bookDetailList List of object having book ids and their required quantity
+     * @return
+     */
+    @PutMapping("/order")
+    public ResponseEntity<Object> orderBooks(@RequestBody  List<BookDetail> bookDetailList) {
+        try {
+            List<Book> books = bookService.orderBooks(bookDetailList);
+            log.info("Books issued successfully");
+            return new ResponseEntity<>(books, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Failed to issue books", e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Used to return back books to inventory when an order is cancelled
+     *
+     * @param bookDetailList
+     * @return
+     */
+    @PutMapping("/return")
+    public ResponseEntity<Boolean> returnBooks(@RequestBody List<BookDetail> bookDetailList) {
+        try {
+            bookService.returnBooks(bookDetailList);
+            log.info("Books returned successfully");
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Failed to return books", e);
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
