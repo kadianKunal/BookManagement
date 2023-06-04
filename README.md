@@ -28,7 +28,7 @@ To get started with the Book Service, follow the instructions below.
 
 ### Usage
 1. Start the application: mvn spring-boot:run
-2. The Book Service will be accessible at http://localhost:8080
+2. The Book Service will be accessible at http://localhost:9000 (this is port of api gateway, which is part of same microservice)
 3. Use a REST client (e.g., Postman) to interact with the available endpoints
 
 ### Endpoints
